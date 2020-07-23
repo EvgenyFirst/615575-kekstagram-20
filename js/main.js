@@ -185,39 +185,37 @@ closeWindowPicComments.addEventListener('keydown', function (evt) {
 var imgUpload = document.querySelector('.img-upload');
 var uploadFile = imgUpload.querySelector('#upload-file');
 var imgUploadOverlay = imgUpload.querySelector('.img-upload__overlay');
-var uploadCancel = imgUploadOverlay.querySelector('#upload-cancel');
 // Открытие и закрытие формы загрузки фото //
 //-//
 // Открытие окна редактирования фото. Событие изменения значения поля (start).//
-var scaleControlValue = imgUpload.querySelector('.scale__control--value');
 
 uploadFile.addEventListener('change', function (evt) {
   evt.preventDefault();
   openImgUploadFile(imgUploadOverlay);
-  scaleControlValue.value = '100%';
 
   imgUploadOverlay.classList.remove('hidden');
   effectLevel.classList.add('hidden');
   scaleControlValue.value = '100%';
   addAllEventListeners(); // Добавлене всех обработчиков событий
+  removeEventListenerOpen();
+  removeEventListenerClose();
 });
 // Открытие окна редактирования фото. Событие изменения значения поля (end).//
 //-//
 // Открытие и закрытие модального окна загрузки фото (start) //
 var imgUploadCancel = imgUploadOverlay.querySelector('.img-upload__cancel');
-var effectsLabel = imgUploadOverlay.querySelector('.effects__label');
 var imUploadScale = imgUploadOverlay.querySelector('.img-upload__scale');
 var effectsPreview = imgUploadOverlay.querySelector('.effects__preview');
 var textHashtags = imgUploadOverlay.querySelector('.text__hashtags');
 var textDescription = imgUploadOverlay.querySelector('.text__description');
 var imgUploadSubmit = imgUploadOverlay.querySelector('.img-upload__submit');
 
-var removeEventListenerClose = function () {
+var removeEventListenerClose = function (evt) {
   evt.preventDefault();
   document.removeEventListener('keydown', closeImgUploadFile);
 };
 
-var removeEventListenerOpen = function () {
+var removeEventListenerOpen = function (evt) {
   evt.preventDefault();
   document.removeEventListener('keydown', openImgUploadFile);
 };
@@ -385,12 +383,12 @@ scaleControlBigger.addEventListener('click', function () {
 function changeImgScale(value) {
   scaleControlValue.value = value + '%';
   imgUploadPreviewImg.style.transform = 'scale(' + (value / 100) + ')';
+
+  removeAllEventListeners();
 }
 // Функция изменения масштаба фотографии в окне загрузки фотографии (end) //
 //-//
 // Применение эффекта для изображения (start) //
-var imgUploadOverlay = imgUpload.querySelector('.img-upload__overlay');
-var uploadCancel = imgUploadOverlay.querySelector('#upload-cancel');
 
 // Эффекты для загруженного изображения
 var imgUploadPreview = imgUpload.querySelector('.img-upload__preview');
@@ -448,8 +446,6 @@ var checkFilter = function (selectedValue) {
 };
 
 // Регулирование глубины эффекта
-var effectLevelPin = document.querySelector('.effect-level__pin');
-var effectLevelLine = document.querySelector('.effect-level__line');
 var PIN_POSITION_MAX = 453;
 
 // Функция рассчитывает позицию ползунка и применяет фильтр
@@ -511,10 +507,11 @@ var removeAllEventListeners = function () {
   effectLevelPin.removeEventListener('mouseup', getPosition);
 
   // клик по кнопке "-"
-  scaleControlSmaller.removeEventListener('click', rediceSzePicture);
+  //scaleControlSmaller.removeEventListener('click', rediceSzePicture);
+  scaleControlSmaller.removeEventListener('click', scaleControlSmaller);
 
   // клик по кнопке "+"
-  scaleControlBigger.removeEventListener('click', increaseSizePicture);
+  scaleControlBigger.removeEventListener('click', scaleControlBigger);
 
   // Удаление обработчика события радио кнопкам
   for (var i = 0; i < effectsRadio.length; i++) {
@@ -530,47 +527,49 @@ var restoreDefault = function () {
   }
   loadedImage.style.filter = 'none';
 };
+
+restoreDefault();
 // обработчики соытий (end) //
 //-//
 // Валидация хеш-тегов (start) //
 
-var textHashtags = document.querySelector('.text__hashtags');
+var textsHashtags = document.querySelector('.text__hashtags');
 var MAX_SYMBOLS = 20;
 var HASHTAG_COUNT = 5;
 var SYMBOL = /#[А-Яа-яA-Za-z0-9]*$/;
 
-var hashtagsValidity = function () {
+var goHashtagsValidity = function () {
   // переменая, содержащая лину ъэш тега
-  var hashtagInputError = textHashtags.value;
+  var hashtagInputError = textsHashtags.value;
   // ъэг тег в нижнем регистре
   var lowerCaseHashtag = hashtagInputError.toLowerCase();
   // массив ъэштегов с пробелом
   var hashtagArr = lowerCaseHashtag.split(' ');
   // очистка поля ошибки, если не хэш тега\ов
-  if (textHashtags.value.length === 0) {
-    textHashtags.setCustomValidity('');
+  if (textsHashtags.value.length === 0) {
+    textsHashtags.setCustomValidity('');
   } else if (hashtagArr.length > HASHTAG_COUNT) {
-    textHashtags.setCustomValidity('нельзя указать больше пяти хэш-тегов');
+    textsHashtags.setCustomValidity('нельзя указать больше пяти хэш-тегов');
   } else {
     for (var i = 0; i < hashtagArr.length; i++) {
       if (hashtagArr[i][0] !== '#' || hashtagArr[0][0] !== '#') {
-        textHashtags.setCustomValidity('хеш-тег начинается с #');
+        textsHashtags.setCustomValidity('хеш-тег начинается с #');
       } else if (hashtagArr[i] === '#') {
-        textHashtags.setCustomValidity('хеш-тег не может состоять только из одной решётки');
+        textsHashtags.setCustomValidity('хеш-тег не может состоять только из одной решётки');
       } else if (hashtagArr.indexOf(hashtagArr[i]) !== i) {
-        textHashtags.setCustomValidity('один и тот же хэш-тег не может быть использован дважды, хэш-теги нечувствительны к регистру: #ХэшТег и #хэштег считаются одним и тем же тегом;');
+        textsHashtags.setCustomValidity('один и тот же хэш-тег не может быть использован дважды, хэш-теги нечувствительны к регистру: #ХэшТег и #хэштег считаются одним и тем же тегом;');
       } else if (hashtagArr[i].length > MAX_SYMBOLS) {
-        textHashtags.setCustomValidity('максимальная длина одного хэш-тега 20 символов, включая решётку');
+        textsHashtags.setCustomValidity('максимальная длина одного хэш-тега 20 символов, включая решётку');
       } else if (hashtagArr[i].split('#').length > 2) {
-        textHashtags.setCustomValidity('хэш-теги разделяются пробелами');
-      } else if (!SYMBOL.test(textHashtags.value)) {
-        textHashtags.setCustomValidity('строка после решётки должна состоять из букв и чисел и не может содержать пробелы, спецсимволы (#, @, $ и т. п.), символы пунктуации (тире, дефис, запятая и т. п.), эмодзи и т. д');
+        textsHashtags.setCustomValidity('хэш-теги разделяются пробелами');
+      } else if (!SYMBOL.test(textsHashtags.value)) {
+        textsHashtags.setCustomValidity('строка после решётки должна состоять из букв и чисел и не может содержать пробелы, спецсимволы (#, @, $ и т. п.), символы пунктуации (тире, дефис, запятая и т. п.), эмодзи и т. д');
       } else {
-        textHashtags.setCustomValidity('');
+        textsHashtags.setCustomValidity('');
       }
     }
   }
 };
 
-textHashtags.addEventListener('input', hashtagsValidity);
+textHashtags.addEventListener('input', goHashtagsValidity);
 // Валидация хеш-тегов (end) //
