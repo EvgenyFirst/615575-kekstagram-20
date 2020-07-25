@@ -69,8 +69,9 @@ var getAmountObjectComment = function (count) {
 var makeInfoPhotos = function () {
   var contents = [];
   for (var i = 0; i < 25; i++) {
+    // for (var i = 0; i < 25; i++) {
     var infoPhotos = {
-      url: "photos/" + (i + 1) + ".jpg", // строка — адрес картинки вида photos/{{i}}.jpg, где {{i}} это число от 1 до 25
+      url: "photos/" + (getValueInterval(1, 25)) + ".jpg", // строка — адрес картинки вида photos/{{i}}.jpg, где {{i}} это число от 1 до 25
       // url: "photos/" + (i + 1) + ".jpg", // строка — адрес картинки вида photos/{{i}}.jpg, где {{i}} это число от 1 до 25
       description: "Описание фотографии", // строка — описание фотографии
       likes: getValueInterval(15, 200), // число — количество лайков, поставленных фотографии. Случайное число от 15 до 200
@@ -99,6 +100,7 @@ var addElement = function (renderWay, elementType, block) {
   }
   block.appendChild(fragment);
 };
+
 // Отрисовка сгенерированных DOM-элементов (end) //
 //-//
 // Добавление данных в блок с фото и комментариями (start) //
@@ -128,10 +130,11 @@ var InfoBigPicture = function (pictureInfo) {
   return bigPicture;
 };
 
-var pictures = makeInfoPhotos(25);
+var pictures = makeInfoPhotos();
 var bigPictureComments = pictures[0].comments;
 addElement(renderElements, pictures, picturesDifferent);
 InfoBigPicture(pictures[0]);
+addElement(addInfoInBigPictureComments, bigPictureComments, socialComments, getAmountObjectComment);
 // Добавление данных в блок с фото и комментариями (end) //
 
 var ESC_CODE = 'Escape';
@@ -140,6 +143,19 @@ var ENTER_CODE = 'Enter';
 // Открытие и закрытие модального окна с описанием фотографии (start) //
 var openPicture = document.querySelector('.picture');
 var closeWindowPicComments = bigPicture.querySelector('.big-picture__cancel');
+
+var elements = document.getElementsByClassName("picture");
+for (var i = 0; i < elements.length; i++) {
+  elements[i].setAttribute ("onclick", "show()");
+  elements[i].addEventListener('click', function () {
+    openWindowPicComments();
+  });
+}
+
+function show() {
+  picturesDifferent.querySelector('.picture').classList.remove('hidden');
+}
+show();
 
 var goWindowPicComments = function () {
   bigPicture.classList.add('hidden');
@@ -160,9 +176,9 @@ var openWindowPicComments = function () {
   document.addEventListener('keydown', OnWindowPicCommentsEsc);
 };
 
-openPicture.addEventListener('click', function () {
-  openWindowPicComments();
-});
+//openPicture.addEventListener('click', function () {
+//  openWindowPicComments();
+//});
 
 openPicture.addEventListener('keydown', function (evt) {
   if (evt.key === ENTER_CODE) {
@@ -204,19 +220,17 @@ uploadFile.addEventListener('change', function (evt) {
 //-//
 // Открытие и закрытие модального окна загрузки фото (start) //
 var imgUploadCancel = imgUploadOverlay.querySelector('.img-upload__cancel');
-var imUploadScale = imgUploadOverlay.querySelector('.img-upload__scale');
+var imgUploadScale = imgUploadOverlay.querySelector('.img-upload__scale');
 var effectsPreview = imgUploadOverlay.querySelector('.effects__preview');
 var textHashtags = imgUploadOverlay.querySelector('.text__hashtags');
 var textDescription = imgUploadOverlay.querySelector('.text__description');
 var imgUploadSubmit = imgUploadOverlay.querySelector('.img-upload__submit');
 
-var removeEventListenerClose = function (evt) {
-  evt.preventDefault();
+var removeEventListenerClose = function () {
   document.removeEventListener('keydown', closeImgUploadFile);
 };
 
-var removeEventListenerOpen = function (evt) {
-  evt.preventDefault();
+var removeEventListenerOpen = function () {
   document.removeEventListener('keydown', openImgUploadFile);
 };
 
@@ -260,7 +274,7 @@ imgUploadCancel.addEventListener('keydown', function (evt) {
   }
 });
 
-imUploadScale.addEventListener('keydown', function (evt) {
+imgUploadScale.addEventListener('keydown', function (evt) {
   if (evt.key === ESC_CODE) {
     closeImgUploadFile();
   }
@@ -280,7 +294,7 @@ textHashtags.addEventListener('keydown', function (evt) {
 
 textDescription.addEventListener('keydown', function (evt) {
   if (evt.key === ESC_CODE) {
-    closeImgUploadFile();
+    evt.stopPropagation();
   }
 });
 
@@ -303,7 +317,7 @@ imgUpload.addEventListener('keydown', function (evt) {
 });
 // Открытие и закрытие модального окна загрузки фото (end) //
 //-//
-// Движение ползанка слвайдера влево и вправо (start) //
+// Движение ползунка слвайдера влево и вправо (start) //
 var effectLevelPin = document.querySelector('.effect-level__pin');
 var effectLevelLine = document.querySelector('.effect-level__line');
 var effectLevelDepth = document.querySelector('.effect-level__depth');
@@ -341,11 +355,10 @@ effectLevelPin.addEventListener('mousedown', function (evt) {
   document.addEventListener('mousemove', onMouseMove);
   document.addEventListener('mouseup', onMouseUp);
 });
-// Движение ползанка слвайдера влево и вправо (end) //
+// Движение ползунка слвайдера влево и вправо (end) //
 //-//
 // Обработчик уменьшения фотографии в окне загрузки фотографии (start) //
 var imgUploadPreviewImg = document.querySelector('.img-upload__preview img');
-var imgUploadScale = document.querySelector('.img-upload__scale');
 var scaleControlBigger = imgUploadScale.querySelector('.scale__control--bigger');
 var scaleControlSmaller = imgUploadScale.querySelector('.scale__control--smaller');
 var scaleControlValue = document.querySelector('.scale__control--value');
@@ -532,7 +545,6 @@ restoreDefault();
 // обработчики соытий (end) //
 //-//
 // Валидация хеш-тегов (start) //
-
 var textsHashtags = document.querySelector('.text__hashtags');
 var MAX_SYMBOLS = 20;
 var HASHTAG_COUNT = 5;
@@ -573,3 +585,55 @@ var goHashtagsValidity = function () {
 
 textHashtags.addEventListener('input', goHashtagsValidity);
 // Валидация хеш-тегов (end) //
+//-//
+// Валидация поля для комментария где загружаются редактируется фото фильтрами (start) //
+var MAX_SYMBOLS_DESC = 140;
+
+var gotextDescription = function () {
+  // переменая, содержащая лину ъэш тега
+  var descInputError = textDescription.value;
+  // ъэг тег в нижнем регистре
+  var lowerCaseDesc = descInputError.toLowerCase();
+  // массив ъэштегов с пробелом
+  var descgArr = lowerCaseDesc.split(' ');
+  for (var i = 0; i < descgArr.length; i++) {
+    if (descgArr[i].length > MAX_SYMBOLS_DESC) {
+      textDescription.setCustomValidity('Длина комментария не может составлять больше 140 символов');
+    } else {
+      textDescription.setCustomValidity('');
+    }
+  }
+};
+
+textDescription.addEventListener('input', gotextDescription);
+// Валидация поля для комментария где загружаются редактируется фото фильтрами (end) //
+//-//
+// Валидация поля для комментария с загруженными фото (start) //
+var textDescriptionAdd = bigPicture.querySelector('.social__footer-text');
+
+var MAX_SYMBOLS_DESC_ADD = 140;
+
+var gotextDescriptionAdd = function () {
+  // переменая, содержащая лину ъэш тега
+  var descInputErrorAdd = textDescriptionAdd.value;
+  // ъэг тег в нижнем регистре
+  var lowerCaseDescAdd = descInputErrorAdd.toLowerCase();
+  // массив ъэштегов с пробелом
+  var descgArrAdd = lowerCaseDescAdd.split(' ');
+  for (var i = 0; i < descgArrAdd.length; i++) {
+    if (descgArrAdd[i].length > MAX_SYMBOLS_DESC_ADD) {
+      textDescriptionAdd.setCustomValidity('Длина комментария не может составлять больше 140 символов');
+    } else {
+      textDescriptionAdd.setCustomValidity('');
+    }
+  }
+};
+
+textDescriptionAdd.addEventListener('input', gotextDescriptionAdd);
+
+textDescriptionAdd.addEventListener('keydown', function (evt) { // если поле комментария в фокусе, то при нажатии кнопки Esc Оно не закроется
+  if (evt.key === ESC_CODE) {
+    evt.stopPropagation();
+  }
+});
+// Валидация поля для комментария с загруженными фото (end) //
