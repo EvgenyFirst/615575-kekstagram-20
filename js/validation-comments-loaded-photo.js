@@ -2,6 +2,9 @@
 
 var goValidationCommentsLoadedPhoto = function () {
   // Валидация поля для комментария с загруженными фото (start) //
+
+  var ESC_CODE = 'Escape';
+
   var bigPicture = document.querySelector(".big-picture");
   var textDescriptionAdd = bigPicture.querySelector('.social__footer-text');
 
